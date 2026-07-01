@@ -1,0 +1,21 @@
+{
+  "name": "grand-slam-offer",
+  "version": "0.1.0",
+  "description": "Tạo một Grand Slam Offer hoàn chỉnh theo phương pháp $100M Offers của Alex Hormozi. Dẫn qua 8 bước ở hai chế độ: hỏi–đáp hoặc tự động.",
+  "author": {
+    "name": "trananhtung"
+  },
+  "homepage": "https://github.com/trananhtung/grand-slam-offer",
+  "repository": "https://github.com/trananhtung/grand-slam-offer",
+  "license": "MIT",
+  "keywords": [
+    "offer",
+    "marketing",
+    "sales",
+    "hormozi",
+    "100m-offers",
+    "grand-slam-offer",
+    "vietnamese"
+  ],
+  "skills": "./skills/"
+}

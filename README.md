@@ -1,8 +1,10 @@
-# Grand Slam Offer — Plugin cho Claude Code
+# Grand Slam Offer — Plugin cho Claude Code & Codex
 
-Plugin giúp bạn tạo một **Grand Slam Offer** hoàn chỉnh — lời chào hàng hấp dẫn đến mức khách hàng cảm thấy *ngốc nếu từ chối* — dựa trên phương pháp trong cuốn ***$100M Offers*** của **Alex Hormozi**.
+Plugin/skill giúp bạn tạo một **Grand Slam Offer** hoàn chỉnh — lời chào hàng hấp dẫn đến mức khách hàng cảm thấy *ngốc nếu từ chối* — dựa trên phương pháp trong cuốn ***$100M Offers*** của **Alex Hormozi**.
 
-Claude sẽ dẫn bạn qua **8 bước** đúng theo khung của cuốn sách và ghi kết quả dần vào một file `my-offer.md`. Có **2 chế độ**: hỏi–đáp từng bước, hoặc để AI tự làm trọn gói.
+AI sẽ dẫn bạn qua **8 bước** đúng theo khung của cuốn sách và ghi kết quả dần vào một file `my-offer.md`. Có **2 chế độ**: hỏi–đáp từng bước, hoặc để AI tự làm trọn gói.
+
+> 🤖 Chạy được trên **cả Claude Code lẫn OpenAI Codex** — dùng chung một "bộ não" skill.
 
 > 🇻🇳 Nội dung plugin bằng **tiếng Việt** (giữ nguyên các thuật ngữ gốc: *Grand Slam Offer, Value Equation, Trim & Stack, MAGIC*).
 
@@ -21,37 +23,54 @@ Claude sẽ dẫn bạn qua **8 bước** đúng theo khung của cuốn sách v
 
 ## 📦 Cài đặt
 
-### Cách 1 — Cài từ GitHub qua marketplace (khuyến nghị)
+### ⚡ Nhanh nhất — script `install.sh` (cả Claude Code lẫn Codex)
 
-Trong Claude Code, chạy 2 lệnh:
+Clone repo rồi chạy (dùng symlink, nên `git pull` là cập nhật ngay):
 
+```bash
+git clone https://github.com/trananhtung/grand-slam-offer.git
+cd grand-slam-offer
+./install.sh          # cài cho cả hai công cụ nếu phát hiện
+# hoặc: ./install.sh claude   |   ./install.sh codex
+```
+
+Mở phiên mới của công cụ để nạp skill/lệnh.
+
+---
+
+### 🟣 Claude Code
+
+**Qua marketplace (khuyến nghị):**
 ```
 /plugin marketplace add trananhtung/grand-slam-offer
 /plugin install grand-slam-offer@grand-slam-offer
 ```
-
-Sau đó khởi động lại phiên (hoặc mở phiên mới) để nạp plugin.
-
-### Cách 2 — Cài từ thư mục local (khi bạn đã clone repo)
-
+**Từ thư mục local đã clone:**
 ```
 /plugin marketplace add /đường-dẫn/tới/grand-slam-offer
 /plugin install grand-slam-offer@grand-slam-offer
 ```
 
-### Cách 3 — Cài thủ công (personal skill + commands)
+### 🟢 OpenAI Codex
 
-Nếu không dùng marketplace, copy trực tiếp:
+**Cách A — skill + slash command (khuyến nghị, dùng `install.sh codex`).** Script sẽ symlink:
+- skill vào `~/.codex/skills/grand-slam-offer/` (Codex tự nhận diện)
+- 2 prompt vào `~/.codex/prompts/` → có lệnh `/grand-slam-offer` và `/grand-slam-offer-auto`
 
+Thủ công tương đương:
 ```bash
-# skill
-cp -r skills/grand-slam-offer ~/.claude/skills/grand-slam-offer
-# commands
-cp commands/grand-slam-offer.md      ~/.claude/commands/grand-slam-offer.md
-cp commands/grand-slam-offer-auto.md ~/.claude/commands/grand-slam-offer-auto.md
+ln -s "$PWD/skills/grand-slam-offer"                ~/.codex/skills/grand-slam-offer
+ln -s "$PWD/codex/prompts/grand-slam-offer.md"      ~/.codex/prompts/grand-slam-offer.md
+ln -s "$PWD/codex/prompts/grand-slam-offer-auto.md" ~/.codex/prompts/grand-slam-offer-auto.md
 ```
 
-Rồi mở phiên Claude Code mới.
+**Cách B — qua Codex plugin marketplace** (repo có sẵn `.codex-plugin/plugin.json`):
+```bash
+codex plugin marketplace add https://github.com/trananhtung/grand-slam-offer.git
+codex plugin add grand-slam-offer
+```
+
+Trên Codex bạn cũng có thể chỉ cần **nói yêu cầu** ("giúp tôi tạo một offer theo kiểu Hormozi") — skill tự kích hoạt theo mô tả.
 
 ---
 
@@ -110,24 +129,33 @@ Ví dụ minh hoạ xuyên suốt trong plugin dùng ngành **Print-on-demand / 
 
 ---
 
-## 🗂 Cấu trúc plugin
+## 🗂 Cấu trúc repo
 
 ```
 grand-slam-offer/
-├── .claude-plugin/
+├── .claude-plugin/                # ← Claude Code plugin
 │   ├── plugin.json
 │   └── marketplace.json
-├── commands/
+├── .codex-plugin/                 # ← Codex plugin
+│   └── plugin.json
+├── commands/                      # slash command cho Claude Code
 │   ├── grand-slam-offer.md        # chế độ hỏi–đáp
 │   └── grand-slam-offer-auto.md   # chế độ tự động
+├── codex/prompts/                 # slash command (custom prompt) cho Codex
+│   ├── grand-slam-offer.md
+│   └── grand-slam-offer-auto.md
 ├── skills/
-│   └── grand-slam-offer/
+│   └── grand-slam-offer/          # ← "bộ não" dùng chung cho CẢ HAI nền tảng
 │       ├── SKILL.md               # điều phối 2 chế độ + 8 bước
+│       ├── AGENTS.md              # để Codex nhận diện skill
 │       ├── references/            # kiến thức chi tiết từng bước (00–08)
 │       └── assets/
 │           └── mau-offer.md       # template hồ sơ offer
-└── README.md
+├── install.sh                     # cài nhanh cho Claude Code &/hoặc Codex
+├── README.md · LICENSE · .gitignore
 ```
+
+> 💡 **Một skill, hai nền tảng:** cả Claude Code và Codex đều dùng chung `skills/grand-slam-offer/`. Mỗi nền tảng chỉ khác lớp "điểm vào" (commands vs codex/prompts) và manifest (`.claude-plugin` vs `.codex-plugin`).
 
 ---
 
