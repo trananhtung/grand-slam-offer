@@ -1,6 +1,7 @@
 # Kết quả offer do người dùng tạo (không đưa lên repo mẫu)
-my-offer.md
-*-offer.md
+# CHỈ khớp file đầu ra mặc định, KHÔNG khớp các file nguồn tên grand-slam-offer.md
+/my-offer.md
+/my-offer*.md
 
 # Hệ điều hành / editor
 .DS_Store
