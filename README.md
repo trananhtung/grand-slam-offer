@@ -86,6 +86,10 @@ Claude sẽ tự chạy hết 8 bước, tự đặt giả định (đánh dấu
 
 > 💡 Bạn cũng có thể không dùng slash command — chỉ cần nói *"giúp tôi tạo một offer theo kiểu Hormozi"* thì skill sẽ tự kích hoạt.
 
+> ℹ️ **Lưu ý tên lệnh:** khi cài **qua marketplace (Cách 1/2)**, lệnh có tiền tố tên plugin:
+> `/grand-slam-offer:grand-slam-offer` và `/grand-slam-offer:grand-slam-offer-auto`.
+> Khi cài **thủ công (Cách 3)**, lệnh gọn hơn: `/grand-slam-offer` và `/grand-slam-offer-auto`.
+
 ---
 
 ## 🧭 8 bước tạo Grand Slam Offer
