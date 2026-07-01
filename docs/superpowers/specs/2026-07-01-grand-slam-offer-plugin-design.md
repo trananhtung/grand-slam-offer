@@ -14,15 +14,16 @@ Xây dựng một **plugin Claude Code** giúp người dùng tạo ra một **G
 |----------|-----------|
 | Nền tảng | Plugin Claude Code chuẩn (`.claude-plugin/plugin.json`) |
 | Ngôn ngữ nội dung | Tiếng Việt (giữ thuật ngữ gốc: "Grand Slam Offer", "Value Equation", "MAGIC"…) |
-| Kiến trúc tương tác | Một skill hội thoại duy nhất dẫn dắt trọn luồng + một slash command mỏng để khởi động |
+| Kiến trúc tương tác | Một skill "bộ não" duy nhất (chung bộ references) chạy được **2 chế độ**, mở qua 2 slash command mỏng |
 | Đầu ra | Một file markdown `my-offer.md` được build dần qua từng bước |
-| Tên lệnh | `/grand-slam-offer` |
+| Hai chế độ | **Hỏi–đáp** (`/grand-slam-offer`): dẫn từng bước, hỏi người dùng. **Tự động** (`/grand-slam-offer-auto`): hỏi 1 câu gom thông tin rồi AI tự làm trọn 8 bước, ghi rõ giả định |
+| Tên lệnh | `/grand-slam-offer` và `/grand-slam-offer-auto` |
 | Ví dụ minh họa | Ngành Print-on-demand / Temu |
 | Bản quyền | Không chép nguyên văn sách; chỉ mã hóa khung/ý tưởng bằng lời tự viết, có ghi nguồn |
 
 ## Nguyên tắc thiết kế
 
-- **Không tách agent riêng, không nhiều slash command**: theo lựa chọn "một skill hội thoại". Toàn bộ trí tuệ nằm trong một skill; slash command chỉ là điểm vào mỏng.
+- **Một "bộ não", hai chế độ chạy**: toàn bộ trí tuệ/phương pháp nằm trong MỘT skill (chung bộ `references/`). Hai slash command chỉ là điểm vào mỏng, mỗi lệnh nói cho skill biết chạy chế độ nào (hỏi–đáp hay tự động). Không tách agent riêng, không có 8 lệnh cho 8 bước.
 - **Progressive disclosure**: `SKILL.md` giữ vai trò "nhạc trưởng" (ngắn gọn: thứ tự bước, quy tắc ghi file). Chi tiết từng bước nằm trong `references/` và chỉ được đọc khi tới bước đó.
 - **Tự chứa kiến thức**: người dùng plugin KHÔNG có cuốn sách. Các file reference phải chứa đủ phương pháp luận (viết lại bằng lời tôi) để dẫn dắt một người chưa đọc sách.
 - **An toàn bản quyền**: mã hóa *khung/quy trình/ý tưởng* (không được bảo hộ), không sao chép câu chữ của tác giả. Ghi nguồn rõ ràng.
@@ -35,10 +36,11 @@ grand-slam-offer/                        # = plugin root
 │   ├── plugin.json                      # manifest plugin
 │   └── marketplace.json                 # cho phép cài trực tiếp từ GitHub repo này
 ├── commands/
-│   └── grand-slam-offer.md              # slash command mỏng: khởi động skill
+│   ├── grand-slam-offer.md              # chế độ HỎI–ĐÁP: khởi động skill, mode=interactive
+│   └── grand-slam-offer-auto.md         # chế độ TỰ ĐỘNG: khởi động skill, mode=auto
 ├── skills/
 │   └── grand-slam-offer/
-│       ├── SKILL.md                     # nhạc trưởng: thứ tự bước + quy tắc ghi file
+│       ├── SKILL.md                     # nhạc trưởng: 2 chế độ + thứ tự bước + quy tắc ghi file
 │       ├── references/
 │       │   ├── 00-tong-quan.md          # tổng quan khung + Value Equation + ví dụ POD xuyên suốt
 │       │   ├── 01-thi-truong.md         # Thị trường đói khát (starving crowd)
@@ -58,16 +60,34 @@ grand-slam-offer/                        # = plugin root
 
 ## Luồng người dùng (runtime)
 
-1. Cài plugin qua marketplace GitHub, gõ `/grand-slam-offer` — hoặc chỉ cần nói "giúp tôi tạo một offer" thì skill tự kích hoạt (nhờ `description`).
-2. Skill hỏi tên/đường dẫn file offer (mặc định `my-offer.md`), tạo từ `assets/mau-offer.md` nếu chưa có; nếu đã có thì đọc để tiếp tục.
+Cả hai chế độ dùng chung 8 bước và cùng ghi vào `my-offer.md` (tạo từ `assets/mau-offer.md` nếu chưa có; nếu đã có thì đọc để tiếp tục).
+
+### Chế độ HỎI–ĐÁP — `/grand-slam-offer`
+
+1. Gõ `/grand-slam-offer` (hoặc chỉ cần nói "giúp tôi tạo một offer" → skill tự kích hoạt nhờ `description`).
+2. Skill hỏi tên/đường dẫn file offer (mặc định `my-offer.md`), tạo file từ template.
 3. Dẫn qua **8 bước tuần tự**. Mỗi bước:
    - Đọc `references/NN-*.md` tương ứng.
    - Giải thích ngắn gọn "bước này là gì, vì sao quan trọng".
    - Hỏi 1–3 câu để thu thập đầu vào từ người dùng.
    - Chốt nội dung, **ghi vào đúng mục trong `my-offer.md`**.
    - Xác nhận với người dùng rồi mới sang bước sau (cho phép nhảy lùi/sửa).
-4. Bước 8: chấm điểm offer theo Value Equation (4 biến, thang 1–10) + checklist các yếu tố nâng cao, đưa gợi ý cải thiện cụ thể.
-5. Kết quả: bản Grand Slam Offer hoàn chỉnh trong `my-offer.md`.
+4. Bước 8: chấm điểm offer theo Value Equation + checklist, đưa gợi ý cải thiện cụ thể.
+
+### Chế độ TỰ ĐỘNG — `/grand-slam-offer-auto`
+
+1. Gõ `/grand-slam-offer-auto`.
+2. Skill hỏi **đúng 1 câu gom thông tin**: mô tả sản phẩm/dịch vụ, khách hàng mục tiêu, mức giá hiện tại, và mục tiêu (càng chi tiết càng tốt; thiếu cũng không sao).
+3. Sau đó AI **tự chạy trọn 8 bước không hỏi thêm**:
+   - Với mỗi bước, đọc reference, tự suy luận & điền nội dung.
+   - Khi thiếu dữ liệu, tự đặt **giả định hợp lý** và **đánh dấu rõ** (ví dụ mục "> Giả định:" trong file) để người dùng dễ chỉnh.
+   - Nơi có nhiều lựa chọn (tên offer, bonus…), AI tự sinh nhiều phương án rồi chọn phương án tốt nhất, giữ phần còn lại làm gợi ý.
+   - Ghi toàn bộ vào `my-offer.md`.
+4. Cuối cùng AI **tự chấm điểm** (bước 8), in bản tóm tắt offer + danh sách giả định đã đặt, rồi mời người dùng tinh chỉnh bất kỳ mục nào (không phải ngõ cụt).
+
+### Cơ chế chọn chế độ (kỹ thuật)
+
+Mỗi command truyền một tín hiệu chế độ cho skill (ví dụ command tự động ghi rõ: "Chạy skill grand-slam-offer ở CHẾ ĐỘ TỰ ĐỘNG"). `SKILL.md` có một mục "Hai chế độ" mô tả khác biệt hành vi; phần 8 bước dùng chung, chỉ khác ở chỗ *ai* cung cấp câu trả lời mỗi bước (người dùng vs AI tự suy luận) và mức độ dừng lại xác nhận.
 
 ## Nội dung 8 bước (đặc tả nội dung reference)
 
@@ -110,19 +130,20 @@ Cho phép: `/plugin marketplace add trananhtung/grand-slam-offer` rồi `/plugin
 
 ## README (hướng dẫn dùng chi tiết)
 
-Gồm: giới thiệu ngắn về Grand Slam Offer; cách cài (marketplace add + install); cách chạy (`/grand-slam-offer`); mô tả 8 bước; một ví dụ chạy thật rút gọn (ngành POD/Temu); ảnh/đoạn hội thoại minh họa; mục "Nguồn & bản quyền" ghi rõ dựa trên sách của Hormozi và không sao chép nguyên văn; giấy phép.
+Gồm: giới thiệu ngắn về Grand Slam Offer; cách cài (marketplace add + install); **cách chạy cả 2 chế độ** (`/grand-slam-offer` hỏi–đáp và `/grand-slam-offer-auto` tự động, kèm khi nào nên dùng chế độ nào); mô tả 8 bước; một ví dụ chạy thật rút gọn cho MỖI chế độ (ngành POD/Temu); đoạn hội thoại minh họa; mục "Nguồn & bản quyền" ghi rõ dựa trên sách của Hormozi và không sao chép nguyên văn; giấy phép.
 
 ## Ngoài phạm vi (YAGNI)
 
 - Không có agent chấm điểm tách riêng (gộp vào bước 8 của skill).
-- Không có nhiều slash command cho từng bước (chỉ 1 điểm vào).
+- Chỉ 2 điểm vào (2 chế độ), KHÔNG có 8 slash command cho từng bước.
 - Không tích hợp MCP/hook.
 - Không đa ngôn ngữ (chỉ tiếng Việt).
 
 ## Tiêu chí hoàn thành
 
-- Cài được plugin từ repo GitHub và chạy `/grand-slam-offer` không lỗi.
-- Skill dẫn hết 8 bước, tạo/ghi được `my-offer.md`.
+- Cài được plugin từ repo GitHub và chạy được cả `/grand-slam-offer` lẫn `/grand-slam-offer-auto` không lỗi.
+- Chế độ hỏi–đáp dẫn hết 8 bước có dừng hỏi người dùng; chế độ tự động chạy trọn 8 bước chỉ sau 1 câu gom thông tin và ghi rõ giả định.
+- Cả hai chế độ tạo/ghi được `my-offer.md`.
 - Nội dung reference đủ để một người chưa đọc sách vẫn làm được offer.
 - README đủ để người lạ tự cài và dùng.
 - Không có đoạn sao chép nguyên văn từ sách; có ghi nguồn.
