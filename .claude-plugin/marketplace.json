@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "grand-slam-offer",
+  "description": "Plugin tạo Grand Slam Offer theo phương pháp $100M Offers của Alex Hormozi (tiếng Việt).",
+  "owner": {
+    "name": "trananhtung"
+  },
+  "plugins": [
+    {
+      "name": "grand-slam-offer",
+      "description": "Dẫn bạn tạo một Grand Slam Offer hoàn chỉnh qua 8 bước, ở chế độ hỏi–đáp hoặc tự động.",
+      "author": {
+        "name": "trananhtung"
+      },
+      "category": "productivity",
+      "source": "./"
+    }
+  ]
+}

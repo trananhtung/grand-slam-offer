@@ -1,0 +1,14 @@
+# Kết quả offer do người dùng tạo (không đưa lên repo mẫu)
+my-offer.md
+*-offer.md
+
+# Hệ điều hành / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Nháp
+scratch/
+tmp/

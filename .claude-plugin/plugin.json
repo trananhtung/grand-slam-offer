@@ -1,0 +1,17 @@
+{
+  "name": "grand-slam-offer",
+  "version": "0.1.0",
+  "description": "Tạo một Grand Slam Offer hoàn chỉnh theo phương pháp $100M Offers của Alex Hormozi. Dẫn qua 8 bước (thị trường, định giá, phương trình giá trị, vấn đề–giải pháp, trim & stack, nâng cao, đặt tên, chấm điểm) ở hai chế độ: hỏi–đáp hoặc tự động.",
+  "author": {
+    "name": "trananhtung"
+  },
+  "keywords": [
+    "offer",
+    "marketing",
+    "sales",
+    "hormozi",
+    "100m-offers",
+    "grand-slam-offer",
+    "vietnamese"
+  ]
+}
